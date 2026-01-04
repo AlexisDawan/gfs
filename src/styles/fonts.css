@@ -1,0 +1,24 @@
+/* Polices modernes pour le Hub Overwatch */
+
+/* Police principale - Roboto (lisible et moderne) */
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+
+/* Police d'accentuation - Exo 2 (futuriste et dynamique) */
+@import '@fontsource/exo-2/600.css';
+@import '@fontsource/exo-2/700.css';
+@import '@fontsource/exo-2/800.css';
+
+:root {
+  --font-primary: 'Roboto', sans-serif;
+  --font-accent: 'Exo 2', sans-serif;
+}
+
+body {
+  font-family: var(--font-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-accent);
+}
