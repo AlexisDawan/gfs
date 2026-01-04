@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, Search, Users, Repeat, Trophy, Info, Zap, Server, Palette, Navigation, TrendingUp, MousePointer2, Smartphone } from "lucide-react";
+import { ChevronDown, Search, Users, Repeat, Trophy, Info, Zap, Server, Palette } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface Feature {

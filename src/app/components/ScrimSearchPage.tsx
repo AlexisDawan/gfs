@@ -694,29 +694,39 @@ export function ScrimSearchPage() {
 
   const getRankColorMemo = useCallback(getRankColor, []);
 
-  // ✅ Position aléatoire pour la publicité (calculée une seule fois)
-  const adPosition = useMemo(() => {
-    if (filteredScrims.length >= 10) {
-      return Math.floor(Math.random() * 6) + 10; // Entre 10 et 15
+  // ✅ Positions pour les publicités (première entre 10-15, puis toutes les 30 cartes)
+  const adPositions = useMemo(() => {
+    if (filteredScrims.length < 10) return [];
+    
+    const positions: number[] = [];
+    const firstAdPosition = Math.floor(Math.random() * 6) + 10; // Entre 10 et 15
+    positions.push(firstAdPosition);
+    
+    // Ajouter une pub toutes les 30 cartes après la première
+    let nextPosition = firstAdPosition + 30;
+    while (nextPosition < filteredScrims.length) {
+      positions.push(nextPosition);
+      nextPosition += 30;
     }
-    return -1; // Pas de pub si moins de 10 scrims
+    
+    return positions;
   }, [filteredScrims.length]);
 
-  // ✅ Construire le tableau avec la pub insérée
+  // ✅ Construire le tableau avec les pubs insérées
   const scrimsWithAd = useMemo(() => {
     const items: Array<{ type: 'scrim' | 'ad'; data?: Scrim; id: string }> = [];
     
     filteredScrims.forEach((scrim, index) => {
       items.push({ type: 'scrim', data: scrim, id: `scrim-${scrim.id}` });
       
-      // Insérer la pub après la carte à la position adPosition
-      if (index === adPosition) {
-        items.push({ type: 'ad', id: 'ad-card' });
+      // Insérer une pub si la position actuelle est dans le tableau adPositions
+      if (adPositions.includes(index)) {
+        items.push({ type: 'ad', id: `ad-card-${index}` });
       }
     });
     
     return items;
-  }, [filteredScrims, adPosition]);
+  }, [filteredScrims, adPositions]);
 
   // Compter les filtres actifs
   const activeFiltersCount = 

@@ -1,4 +1,4 @@
-import { Zap, Wrench, CheckCircle, TrendingUp } from "lucide-react";
+import { Zap, Wrench, CheckCircle, TrendingUp, DollarSign } from "lucide-react";
 
 export interface Update {
   id: number;
@@ -17,6 +17,32 @@ export const updates: Update[] = [
   // January 2026
   {
     id: 1,
+    category: "Improved",
+    categoryColor: "#6c63ff",
+    title: "Google AdSense integration",
+    description: "Monetization system with contextual ads for platform sustainability.",
+    longDescription:
+      "Deployed Google AdSense with responsive ad blocks integrated seamlessly into the scrim grid. Ads appear strategically (every 30 cards) to generate passive revenue while maintaining excellent user experience. This ensures long-term platform sustainability and continuous improvements.",
+    date: "Jan 17, 2026",
+    month: "January 2026",
+    impact: "Low",
+    icon: DollarSign,
+  },
+  {
+    id: 2,
+    category: "Improved",
+    categoryColor: "#6c63ff",
+    title: "Optimized ad distribution system",
+    description: "Smart ad placement algorithm for balanced monetization.",
+    longDescription:
+      "Implemented an intelligent ad distribution system that places ads between cards 10-15 initially, then repeats every 30 cards (positions 42, 72, 102, etc.). This balanced approach maximizes revenue potential (estimated 300-500% increase) without overwhelming users, maintaining a clean browsing experience.",
+    date: "Jan 16, 2026",
+    month: "January 2026",
+    impact: "Low",
+    icon: TrendingUp,
+  },
+  {
+    id: 3,
     category: "New",
     categoryColor: "#00d4ff",
     title: "Multi-server Discord integration",
@@ -29,7 +55,7 @@ export const updates: Update[] = [
     icon: Zap,
   },
   {
-    id: 2,
+    id: 4,
     category: "Improved",
     categoryColor: "#6c63ff",
     title: "Faster Discord message parsing",
@@ -42,7 +68,7 @@ export const updates: Update[] = [
     icon: TrendingUp,
   },
   {
-    id: 3,
+    id: 5,
     category: "New",
     categoryColor: "#00d4ff",
     title: "Advanced scrim filtering",
@@ -55,7 +81,7 @@ export const updates: Update[] = [
     icon: Wrench,
   },
   {
-    id: 4,
+    id: 6,
     category: "Improved",
     categoryColor: "#6c63ff",
     title: "Automatic message lifecycle management",
@@ -68,7 +94,7 @@ export const updates: Update[] = [
     icon: CheckCircle,
   },
   {
-    id: 5,
+    id: 7,
     category: "New",
     categoryColor: "#00d4ff",
     title: "Platform updates section",
@@ -81,7 +107,7 @@ export const updates: Update[] = [
     icon: Zap,
   },
   {
-    id: 6,
+    id: 8,
     category: "Improved",
     categoryColor: "#6c63ff",
     title: "Complete homepage redesign",
@@ -94,7 +120,7 @@ export const updates: Update[] = [
     icon: TrendingUp,
   },
   {
-    id: 7,
+    id: 9,
     category: "New",
     categoryColor: "#00d4ff",
     title: "Infinite Discord logo carousel",
@@ -109,7 +135,7 @@ export const updates: Update[] = [
 
   // December 2025
   {
-    id: 8,
+    id: 10,
     category: "Fixed",
     categoryColor: "#ffd700",
     title: "Region detection issues",
@@ -122,7 +148,7 @@ export const updates: Update[] = [
     icon: CheckCircle,
   },
   {
-    id: 9,
+    id: 11,
     category: "Improved",
     categoryColor: "#6c63ff",
     title: "Cyber Minimal design system",
@@ -135,7 +161,7 @@ export const updates: Update[] = [
     icon: TrendingUp,
   },
   {
-    id: 10,
+    id: 12,
     category: "New",
     categoryColor: "#00d4ff",
     title: "Multi-search capability",
@@ -148,7 +174,7 @@ export const updates: Update[] = [
     icon: Zap,
   },
   {
-    id: 11,
+    id: 13,
     category: "Improved",
     categoryColor: "#6c63ff",
     title: "Supabase backend architecture",
@@ -161,7 +187,7 @@ export const updates: Update[] = [
     icon: Wrench,
   },
   {
-    id: 12,
+    id: 14,
     category: "New",
     categoryColor: "#00d4ff",
     title: "Dynamic stats display",
@@ -174,7 +200,7 @@ export const updates: Update[] = [
     icon: TrendingUp,
   },
   {
-    id: 13,
+    id: 15,
     category: "Improved",
     categoryColor: "#6c63ff",
     title: "Interactive mouse-reactive hexagons",
@@ -187,7 +213,7 @@ export const updates: Update[] = [
     icon: Zap,
   },
   {
-    id: 14,
+    id: 16,
     category: "New",
     categoryColor: "#00d4ff",
     title: "React Router DOM navigation",
