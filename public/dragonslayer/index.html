@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Dragonslayer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Public+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  [hidden]{display:none!important;}
+  /* Dragonslayer — compagnon d'entraînement du Projet Berserk.
+     DA volontairement mono-thème (noir/sang/acier), héritée du plan. */
+  :root{
+    --ink:#111013;
+    --surface:#1b1a1f;
+    --surface2:#232127;
+    --line:#312e36;
+    --paper:#e8e4dc;
+    --muted:#a49e92;
+    --blood:#c22f2c;
+    --blood-soft:#7a2422;
+    --steel:#4f9bd9;
+    --ok:#7d9b6a;
+  }
+  html{background:var(--ink);}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Public Sans',system-ui,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;letter-spacing:.04em;}
+  .mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+
+  .shell{max-width:640px;margin:0 auto;padding:0 16px calc(84px + env(safe-area-inset-bottom));}
+
+  /* ---- header ---- */
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+    padding:20px 0 14px;border-bottom:3px solid var(--blood);margin-bottom:18px;
+  }
+  .brand .eyebrow{color:var(--blood);font-size:11px;text-transform:uppercase;letter-spacing:.18em;font-weight:700;margin:0 0 2px;}
+  .brand h1{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;letter-spacing:.05em;font-size:38px;line-height:.95;margin:0;}
+  #savechip{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);
+    border:1px solid var(--line);background:var(--surface);padding:4px 9px;white-space:nowrap;
+  }
+  #savechip.ok{color:var(--ok);border-color:var(--ok);}
+  #savechip.warn{color:var(--blood);border-color:var(--blood-soft);}
+
+  h2{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;letter-spacing:.05em;font-size:24px;margin:26px 0 4px;}
+  h2 .tick{color:var(--blood);}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 12px;}
+
+  /* ---- verdict banner ---- */
+  .verdict{border-left:3px solid var(--muted);background:var(--surface);padding:14px 16px;margin:0 0 16px;}
+  .verdict .big{font-family:'Bebas Neue',Impact,sans-serif;font-size:26px;letter-spacing:.04em;line-height:1.05;}
+  .verdict.good{border-color:var(--ok);}
+  .verdict.good .big{color:var(--ok);}
+  .verdict.bad{border-color:var(--blood);}
+  .verdict.bad .big{color:var(--blood);}
+  .verdict .det{color:var(--muted);font-size:12.5px;margin-top:4px;}
+
+  /* ---- stat grid ---- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);}
+  .stat{background:var(--surface);padding:12px 14px;}
+  .stat .k{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);}
+  .stat .v{font-family:'Bebas Neue',Impact,sans-serif;font-size:28px;line-height:1.1;margin-top:2px;font-variant-numeric:tabular-nums;}
+  .stat .v small{font-size:15px;color:var(--muted);}
+  .stat.red .v{color:var(--blood);}
+  .stat.blue .v{color:var(--steel);}
+  .stat.green .v{color:var(--ok);}
+
+  /* ---- cards ---- */
+  .card{background:var(--surface);border:1px solid var(--line);padding:16px 18px;margin-top:12px;}
+  .card .day{color:var(--blood);font-size:11px;text-transform:uppercase;letter-spacing:.16em;font-weight:700;display:block;margin-bottom:4px;}
+  .card h3{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;letter-spacing:.05em;font-size:22px;margin:0 0 6px;}
+  .card .note{color:var(--muted);font-size:12.5px;margin-top:12px;border-top:1px dashed var(--line);padding-top:9px;}
+
+  /* ---- checklist ---- */
+  .check{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-top:1px solid var(--line);cursor:pointer;user-select:none;}
+  .check:first-of-type{border-top:none;}
+  .box{
+    flex:none;width:20px;height:20px;margin-top:1px;border:2px solid var(--muted);
+    display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--ink);background:transparent;
+  }
+  .check.on .box{background:var(--blood);border-color:var(--blood);}
+  .check.on .box::after{content:"✕";}
+  .check .lbl{font-size:14px;}
+  .check.on .lbl{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--blood-soft);}
+  .check .lbl b{color:var(--paper);}
+  .check.on .lbl b{color:var(--muted);}
+  .check.auto{cursor:default;}
+  .check.auto .box{border-style:dashed;}
+  .check.auto.on .box{border-style:solid;}
+
+  /* ---- inputs & buttons ---- */
+  input[type=number],input[type=date]{
+    background:var(--surface2);border:1px solid var(--line);color:var(--paper);
+    font-family:'IBM Plex Mono',monospace;font-size:16px;padding:9px 10px;width:100%;box-sizing:border-box;
+    border-radius:0;appearance:none;-webkit-appearance:none;
+  }
+  input:focus-visible,button:focus-visible{outline:2px solid var(--blood);outline-offset:2px;}
+  ::placeholder{color:var(--muted);opacity:.7;}
+  .btn{
+    background:var(--blood);border:none;color:var(--paper);cursor:pointer;
+    font-family:'Bebas Neue',Impact,sans-serif;font-size:18px;letter-spacing:.08em;padding:10px 18px;
+  }
+  .btn:active{background:var(--blood-soft);}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);font-size:15px;}
+  .row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;}
+  .row > *{min-width:0;}
+  .row input{width:auto;}
+  .row input[type=date]{flex:1 1 150px;}
+  .row input[type=number]{flex:1 1 90px;}
+  .row .grow{flex:1;}
+
+  /* ---- jalons ---- */
+  .ms{border:1px solid var(--line);background:var(--surface);padding:13px 16px;margin-top:10px;}
+  .ms .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .ms .wk{font-family:'Bebas Neue',Impact,sans-serif;font-size:21px;letter-spacing:.05em;}
+  .ms .tg{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--blood);white-space:nowrap;}
+  .ms .top .st{margin-left:auto;}
+  .ms .test{color:var(--muted);font-size:12.5px;margin-top:6px;}
+
+  /* ---- segmented (progression tractions) ---- */
+  .seg{display:flex;border:1px solid var(--line);}
+  .seg button{
+    flex:1;background:var(--surface2);border:none;color:var(--muted);cursor:pointer;
+    font-family:'Public Sans',sans-serif;font-size:12px;font-weight:600;padding:8px 4px;border-left:1px solid var(--line);
+  }
+  .seg button:first-child{border-left:none;}
+  .seg button.on{background:var(--blood-soft);color:var(--paper);}
+
+  /* ---- week chips ---- */
+  .weekchips{display:flex;gap:6px;margin-top:10px;}
+  .wc{
+    flex:1;text-align:center;border:1px solid var(--line);background:var(--surface2);
+    padding:7px 2px;font-size:11px;color:var(--muted);
+  }
+  .wc .d{font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;color:var(--paper);display:block;line-height:1;}
+  .wc.done{border-color:var(--ok);}
+  .wc.done .d{color:var(--ok);}
+  .wc.today{border-color:var(--blood);}
+
+  /* ---- tables ---- */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  .tablebox{overflow-x:auto;border:1px solid var(--line);margin-top:12px;}
+  th{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);text-align:left;padding:9px 11px;background:var(--surface2);font-weight:600;}
+  td{padding:9px 11px;border-top:1px solid var(--line);background:var(--surface);vertical-align:top;}
+  td.num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .phase-tag{display:inline-block;background:var(--blood-soft);color:var(--paper);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;white-space:nowrap;}
+  .st{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;}
+  .st.ok{border-color:var(--ok);color:var(--ok);}
+  .st.ko{border-color:var(--blood);color:var(--blood);}
+  .st.now{border-color:var(--steel);color:var(--steel);}
+
+  /* ---- chart ---- */
+  .chartbox{border:1px solid var(--line);background:var(--surface);padding:12px 10px 6px;margin-top:12px;}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);padding:0 6px 8px;}
+  .legend .sw{display:inline-block;width:16px;height:0;border-top:2.5px solid var(--steel);vertical-align:middle;margin-right:6px;}
+  .legend .sw.dash{border-top-style:dashed;border-top-color:var(--blood);}
+  svg{display:block;width:100%;height:auto;}
+
+  /* ---- entries list ---- */
+  .entries{margin-top:12px;border:1px solid var(--line);}
+  .entry{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid var(--line);background:var(--surface);font-size:13.5px;}
+  .entry:first-child{border-top:none;}
+  .entry .dt{color:var(--muted);flex:1;}
+  .entry .kg{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+  .entry .diff{font-family:'IBM Plex Mono',monospace;font-size:11.5px;width:56px;text-align:right;}
+  .entry .diff.down{color:var(--ok);}
+  .entry .diff.up{color:var(--blood);}
+  .entry button{background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;padding:2px 6px;}
+
+  /* ---- rules block ---- */
+  .rules{border-left:3px solid var(--blood);background:var(--surface);padding:12px 16px;margin-top:12px;}
+  .rules p{margin:6px 0;font-size:13px;color:var(--muted);}
+  .rules b{color:var(--blood);}
+
+  .quote{margin:36px 0 8px;text-align:center;color:var(--muted);font-style:italic;font-size:13.5px;padding:0 12px;}
+  .quote .display{display:block;font-style:normal;color:var(--paper);font-size:20px;letter-spacing:.06em;margin-top:4px;}
+
+  /* ---- bottom tabs ---- */
+  nav.tabs{
+    position:fixed;left:0;right:0;bottom:0;z-index:10;
+    background:var(--surface);border-top:1px solid var(--line);
+    display:flex;justify-content:center;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  nav.tabs .inner{display:flex;width:100%;max-width:640px;}
+  nav.tabs button{
+    flex:1;background:none;border:none;cursor:pointer;padding:10px 2px 12px;
+    color:var(--muted);font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;letter-spacing:.08em;
+    border-top:3px solid transparent;margin-top:-1px;
+  }
+  nav.tabs button[aria-current="true"]{color:var(--paper);border-top-color:var(--blood);}
+
+  @media (prefers-reduced-motion: no-preference){
+    .verdict,.card,.stats{animation:fade .25s ease-out;}
+    @keyframes fade{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header>
+    <div class="brand">
+      <p class="eyebrow">Projet Berserk · Phase 1</p>
+      <h1>Dragonslayer</h1>
+    </div>
+    <span id="savechip">—</span>
+  </header>
+
+  <!-- ================= JOUR ================= -->
+  <section id="view-jour">
+    <div id="jour-date" class="sub" style="font-size:14px;"></div>
+    <div id="verdict-jour"></div>
+
+    <div id="jour-stats"></div>
+
+    <h2><span class="tick">/</span> Pesée du matin</h2>
+    <p class="sub">À jeun. Seule la moyenne hebdomadaire compte.</p>
+    <div class="row">
+      <input class="grow" type="number" id="w-today" inputmode="decimal" step="0.1" min="60" max="130" placeholder="kg">
+      <button class="btn" id="w-today-btn" type="button">Enregistrer</button>
+    </div>
+
+    <h2><span class="tick">/</span> Séance du jour</h2>
+    <div id="jour-session"></div>
+
+    <h2><span class="tick">/</span> Les 4 règles</h2>
+    <p class="sub mono" style="font-size:12px;">Cible : 2 200 kcal · 170 g de protéines · 8–10 k pas</p>
+    <div class="card" style="margin-top:0;" id="habits-list"></div>
+    <div id="streak-line" class="sub" style="margin-top:8px;"></div>
+  </section>
+
+  <!-- ================= SÉANCE ================= -->
+  <section id="view-seance" hidden>
+    <div id="seance-body"></div>
+    <h2><span class="tick">/</span> Progression tractions</h2>
+    <p class="sub">Sans barre (tirage élastique) → négatives lentes → élastique → strictes. Chaque kilo perdu = une traction gagnée.</p>
+    <div class="seg" id="pullup-seg" role="group" aria-label="Niveau de progression tractions"></div>
+    <h2><span class="tick">/</span> Cette semaine</h2>
+    <div id="week-chips"></div>
+    <div class="rules">
+      <p><b>Le coude.</b> La moindre douleur articulaire = corde légère ou repos, pas « je serre les dents ».</p>
+      <p><b>Le syndrome militaire.</b> Le risque n°1 : en faire trop les 2 premières semaines. On remonte progressivement.</p>
+      <p><b>La régularité bat l'intensité.</b> 4 séances moyennes chaque semaine &gt; 6 séances parfaites puis plus rien.</p>
+    </div>
+  </section>
+
+  <!-- ================= POIDS ================= -->
+  <section id="view-poids" hidden>
+    <h2 style="margin-top:6px;"><span class="tick">/</span> Trajectoire</h2>
+    <p class="sub">91,1 → 83 kg à −0,5 kg/semaine. La ligne acier doit rester sous la ligne sang.</p>
+    <div id="poids-stats"></div>
+    <div class="chartbox">
+      <div class="legend">
+        <span><span class="sw"></span>Poids — moyenne hebdo</span>
+        <span><span class="sw dash"></span>Trajectoire cible</span>
+      </div>
+      <div id="chart"></div>
+    </div>
+    <h2><span class="tick">/</span> Nouvelle pesée</h2>
+    <div class="row">
+      <input type="date" id="w-date">
+      <input class="grow" type="number" id="w-kg" inputmode="decimal" step="0.1" min="60" max="130" placeholder="kg">
+      <button class="btn" id="w-add-btn" type="button">OK</button>
+    </div>
+    <div id="entries"></div>
+    <p class="sub" id="storage-note" style="margin-top:10px;"></p>
+
+    <h2><span class="tick">/</span> Sauvegarde &amp; export</h2>
+    <p class="sub">Tes données vivent dans la base Supabase (table <span class="mono">dragonslayer_state</span>), synchronisées en direct entre tes appareils. Le CSV s'ouvre dans Google&nbsp;Sheets ou Excel ; le JSON sert de copie de secours.</p>
+    <div class="row" id="export-row">
+      <button class="btn ghost grow" id="exp-csv" type="button">Exporter CSV</button>
+      <button class="btn ghost grow" id="exp-json" type="button">Sauvegarde JSON</button>
+      <button class="btn ghost grow" id="imp-btn" type="button">Importer</button>
+    </div>
+    <input type="file" id="imp-file" accept=".json,application/json" hidden>
+    <div class="card" id="imp-confirm" hidden></div>
+    <p class="sub" id="exp-note" style="margin-top:8px;"></p>
+  </section>
+
+  <!-- ================= JALONS ================= -->
+  <section id="view-jalons" hidden>
+    <div id="verdict-jalons" style="margin-top:6px;"></div>
+    <h2><span class="tick">/</span> Checkpoints phase 1</h2>
+    <p class="sub">Statut calculé automatiquement d'après la date et ta moyenne hebdo.</p>
+    <div id="milestones"></div>
+    <h2><span class="tick">/</span> Les 3 phases</h2>
+    <div class="tablebox"><table>
+      <tr><th>Phase</th><th>Période</th><th>Objectif</th></tr>
+      <tr><td><span class="phase-tag">Phase 1</span></td><td class="num">M1 – M4</td><td>91 → 83 kg. Sèche + base force + boxe en solo. Discipline pure.</td></tr>
+      <tr><td><span class="phase-tag">Phase 2</span></td><td class="num">M5 – M9</td><td>83 → ~79 kg. <b>Club de boxe anglaise — non négociable.</b> Haltères réglables ou kettlebell 16 kg.</td></tr>
+      <tr><td><span class="phase-tag">Phase 3</span></td><td class="num">M10 – M24</td><td>Recomposition : léger surplus, charges progressives, sparring. Le physique « Guts » se construit ici.</td></tr>
+    </table></div>
+  </section>
+
+  <p class="quote" id="quote"></p>
+</div>
+
+<nav class="tabs" aria-label="Navigation">
+  <div class="inner">
+    <button data-tab="jour" aria-current="true" type="button">Jour</button>
+    <button data-tab="seance" aria-current="false" type="button">Séance</button>
+    <button data-tab="poids" aria-current="false" type="button">Poids</button>
+    <button data-tab="jalons" aria-current="false" type="button">Jalons</button>
+  </div>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+"use strict";
+/* ================= données du plan ================= */
+const DEFAULT_STATE = {
+  v: 2,
+  startDate: "2026-08-31",
+  startWeight: 91.1,
+  goalWeight: 83,
+  pullupLevel: 1,
+  weights: {},   // "YYYY-MM-DD" -> kg
+  habits: {},    // "YYYY-MM-DD" -> {prot,liquide,pas}
+  sessions: {},  // "YYYY-MM-DD" -> [ids d'exercices cochés]
+  updatedAt: 0
+};
+
+const PULLUP_LEVELS = [
+  { seg:"Sans barre", ex:"Tirage vertical élastique — ancré en haut de porte, à genoux, 4×12" },
+  { seg:"Négatives",  ex:"Tractions négatives lentes — 5×3, descente 5–10 s" },
+  { seg:"Élastique",  ex:"Tractions avec élastique — 5×5" },
+  { seg:"Strictes",   ex:"Tractions strictes — 5×max" }
+];
+
+const PLAN = {
+  1: { tag:"Lundi — Force A · Tirage", title:"Le dos de Guts",
+       ex:[ {id:"a1", dyn:true},
+            {id:"a2", t:"Rows élastique — 4×15, élastique noir 30–60 lb (plus dur ou doublé quand 15 reps deviennent faciles)"},
+            {id:"a3", t:"Pompes — 4×max, amplitude complète, poitrine près du sol, même si les reps chutent"},
+            {id:"a4", t:"Face pulls élastique — 3×15"},
+            {id:"a5", t:"Planche — 3×20–30 s, fessiers serrés, bassin rétroversé (bas du dos qui tire → dead bug 3×10/côté)"} ],
+       note:"Baseline S1 : pompes 20/14/8/4 (46). Chaque jour avec accès à la barre = quelques tractions ou négatives, même hors séance." },
+  3: { tag:"Mercredi — Boxe · Technique", title:"Fondamentaux",
+       ex:[ {id:"b1", t:"Corde à sauter — 4×1 min (corde lestée 3 kg, rounds courts)"},
+            {id:"b2", t:"Shadow boxing — 6×3 min / 1 min repos : stance, jab, jab-cross, déplacements, miroir"},
+            {id:"b3", t:"Shadow lesté — 2×2 min avec les haltères de 2 kg"} ],
+       note:"Le style soviet s'apprend en club (phase 2). Seul, tu poses les bases." },
+  5: { tag:"Vendredi — Force B · Jambes + push", title:"Châssis",
+       ex:[ {id:"c1", t:"Squats tempo — 4×15 (→ bulgarian split squats 4×10/jambe)"},
+            {id:"c2", t:"Fentes marchées — 3×20"},
+            {id:"c3", t:"Hip thrust unilatéral — 3×12/jambe"},
+            {id:"c4", t:"Dips entre deux chaises ou pompes déclinées — 3×max"},
+            {id:"c5", t:"Hollow hold — 3×30 s"} ],
+       note:"Ajoute le sac à dos lesté dès que 15 reps deviennent faciles." },
+  6: { tag:"Samedi — Conditionnement", title:"Moteur",
+       ex:[ {id:"d1", t:"Intervals corde — 10×30 s effort / 30 s repos"},
+            {id:"d2", t:"Burpees — 5×10"},
+            {id:"d3", t:"Ruck — 45 min avec sac 10–15 kg"} ],
+       note:"Pluie : tant mieux. Fatigue : footing 30 min allure conversation." }
+};
+
+const MILESTONES = [
+  { week:4,  target:89, test:"Photos + tour de taille. 1re traction négative contrôlée 10 s." },
+  { week:8,  target:87, test:"3 rounds de corde sans pause. 30 pompes d'affilée." },
+  { week:12, target:85, test:"1re traction stricte. Tour de taille ≤ 89 cm." },
+  { week:16, target:83, test:"3 tractions strictes. Bilan photos → lancement phase 2." }
+];
+
+const HABITS = [
+  { id:"prot",    lbl:"<b>Protéines à chaque repas</b> — œufs, viande, poisson, fromage blanc, whey" },
+  { id:"liquide", lbl:"<b>Zéro calorie liquide</b> — le levier le plus rentable" },
+  { id:"pas",     lbl:"<b>8 000–10 000 pas</b> — le déficit se gagne en marchant" }
+];
+
+const QUOTES = [
+  ["« Même si tu forces le retour de ce qui était perdu… ça ne sera plus jamais comme avant. »","Alors on construit mieux qu'avant."],
+  ["« Si tu serres les dents et que tu tiens bon, il restera toujours quelque chose. »","Une séance à la fois."],
+  ["« Je ne veux plus rien perdre sans m'être battu. »","La régularité bat l'intensité."]
+];
+
+/* ================= état & persistance =================
+   La base : Supabase (projet GoForScrim), table dragonslayer_state,
+   une seule ligne id='main' portant tout l'état en jsonb. La clé anon
+   est publique par conception (comme dans utils/supabase/info.tsx). */
+const SB_URL = "https://nagnnlhxrpfgrrjptmcl.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZ25ubGh4cnBmZ3JyanB0bWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4MjI2OTUsImV4cCI6MjA4MjM5ODY5NX0.QlKNsi4QLEHMLwg-ho1HJ7-Q2pKsyeR-Pkz3FMOIRpc";
+let sb = null;
+try{ if(window.supabase && window.supabase.createClient) sb = window.supabase.createClient(SB_URL, SB_KEY); }catch(e){}
+
+const LS_KEY = "dragonslayer-state";
+let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+let saveTimer = 0, retried = false;
+
+// v1 → v2 : le niveau « Sans barre » s'insère avant « Négatives »
+function migrate(raw){
+  if((Number(raw.v) || 1) < 2) state.pullupLevel = (Number(raw.pullupLevel) || 0) + 1;
+  state.v = 2;
+  state.pullupLevel = Math.min(Math.max(0, Number(state.pullupLevel) || 0), PULLUP_LEVELS.length - 1);
+  delete state.notion; // vestiges des anciens miroirs (versions artifact)
+  delete state.sheet;
+}
+
+const $ = s => document.querySelector(s);
+const chip = $("#savechip");
+function setChip(mode){
+  const m = { pending:["—",""], saving:["sauvegarde…",""], saved:["sauvegardé ✓","ok"],
+              local:["stockage local","warn"], retry:["nouvel essai…","warn"], ro:["lecture seule","warn"] }[mode];
+  chip.textContent = m[0]; chip.className = m[1];
+}
+
+function cacheLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function touch(){ state.updatedAt = Date.now(); cacheLocal(); retried = false;
+  clearTimeout(saveTimer); saveTimer = setTimeout(persist, 1500);
+  if(sb) setChip("saving");
+  renderAll();
+}
+async function persist(){
+  if(!sb){ setChip("local"); return; }
+  setChip("saving");
+  try{
+    const { error } = await sb.from("dragonslayer_state")
+      .upsert({ id: "main", data: state, updated_at: new Date().toISOString() });
+    if(error) throw error;
+    retried = false;
+    setChip("saved");
+  }catch(e){
+    if(!retried){ retried = true; setChip("retry"); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 4000 + Math.random()*3000); }
+    else setChip("local");
+  }
+}
+function noteStorage(){
+  $("#storage-note").textContent = sb ? "" :
+    "⚠ Base injoignable : les données restent dans ce navigateur pour l'instant, elles repartiront vers la base à la prochaine ouverture connectée.";
+}
+
+/* ================= dates ================= */
+const pad = n => String(n).padStart(2,"0");
+const keyOf = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parseKey = k => { const [y,m,d] = k.split("-").map(Number); return new Date(y, m-1, d); };
+const todayKey = () => keyOf(new Date());
+const DAY = 864e5;
+const daysSinceStart = k => Math.round((parseKey(k) - parseKey(state.startDate)) / DAY);
+const phaseWeek = k => { const d = daysSinceStart(k); return d < 0 ? 0 : Math.floor(d/7) + 1; };
+const fmtDate = k => parseKey(k).toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long" });
+const fmtShort = k => parseKey(k).toLocaleDateString("fr-FR", { day:"numeric", month:"short" });
+const fmtKg = v => v.toLocaleString("fr-FR", { minimumFractionDigits:1, maximumFractionDigits:1 });
+
+/* ================= calculs ================= */
+const sortedKeys = () => Object.keys(state.weights).sort();
+function lastWeight(){ const ks = sortedKeys(); return ks.length ? state.weights[ks[ks.length-1]] : null; }
+function avgLast7(){
+  const d = parseKey(todayKey()); const vals = [];
+  for(let i=0;i<7;i++){ const k = keyOf(d); if(state.weights[k] != null) vals.push(state.weights[k]); d.setDate(d.getDate()-1); }
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+}
+function weeklyAvg(w){
+  const vals = sortedKeys().filter(k => phaseWeek(k) === w).map(k => state.weights[k]);
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+}
+const targetAt = wFrac => Math.max(state.goalWeight, state.startWeight - 0.5*Math.max(0,wFrac));
+
+function verdict(){
+  const days = daysSinceStart(todayKey());
+  if(days < 0) return { cls:"", big:"Départ " + fmtDate(state.startDate), det:"La forge ouvre lundi. Objectif phase 1 : 83 kg en 16 semaines." };
+  const target = targetAt(days/7);
+  const avg = avgLast7() ?? lastWeight();
+  if(avg == null) return { cls:"", big:"Enregistre ta première pesée", det:"Cible actuelle : " + fmtKg(target) + " kg." };
+  const delta = avg - target;
+  const det = "Moyenne 7 j : " + fmtKg(avg) + " kg · cible semaine " + Math.min(16, phaseWeek(todayKey())) + " : " + fmtKg(target) + " kg";
+  if(Math.abs(delta) <= 0.3) return { cls:"good", big:"Sur la trajectoire", det };
+  if(delta < 0) return { cls:"good", big:"En avance de " + fmtKg(-delta) + " kg", det };
+  return { cls:"bad", big:"En retard de " + fmtKg(delta) + " kg", det };
+}
+
+function sessionFor(k){ return PLAN[parseKey(k).getDay()] || null; }
+function exList(sess){
+  return sess.ex.map(e => e.dyn ? { id:e.id, t:PULLUP_LEVELS[state.pullupLevel].ex } : e);
+}
+function sessionDone(k){
+  const sess = sessionFor(k); if(!sess) return false;
+  const done = state.sessions[k] || [];
+  return sess.ex.every(e => done.includes(e.id));
+}
+function mondayOf(k){ const d = parseKey(k); d.setDate(d.getDate() - (d.getDay()+6)%7); return d; }
+function addDays(d, n){ const r = new Date(d); r.setDate(r.getDate()+n); return r; }
+
+/* ================= rendu ================= */
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+function renderVerdict(){
+  const v = verdict();
+  const html = '<div class="verdict '+v.cls+'"><div class="big">'+v.big+'</div><div class="det">'+v.det+'</div></div>';
+  $("#verdict-jour").innerHTML = html;
+  $("#verdict-jalons").innerHTML = html;
+}
+
+function renderJour(){
+  const tk = todayKey();
+  const w = phaseWeek(tk);
+  $("#jour-date").textContent = fmtDate(tk).replace(/^./, c => c.toUpperCase());
+
+  const last = lastWeight(), avg = avgLast7();
+  const weekLabel = daysSinceStart(tk) < 0 ? "J−" + (-daysSinceStart(tk)) : (w > 16 ? "P1 finie" : w + "<small>/16</small>");
+  let nDone = 0;
+  const mon = mondayOf(tk);
+  [1,3,5,6].forEach(dw => { const k = keyOf(addDays(mon, (dw+6)%7)); if(sessionDone(k)) nDone++; });
+  $("#jour-stats").innerHTML = '<div class="stats">'
+    + '<div class="stat"><div class="k">Semaine</div><div class="v">' + weekLabel + '</div></div>'
+    + '<div class="stat blue"><div class="k">Dernier poids</div><div class="v">' + (last!=null?fmtKg(last):"—") + '<small> kg</small></div></div>'
+    + '<div class="stat"><div class="k">Moyenne 7 j</div><div class="v">' + (avg!=null?fmtKg(avg):"—") + '<small> kg</small></div></div>'
+    + '<div class="stat red"><div class="k">Séances</div><div class="v">' + nDone + '<small>/4</small></div></div>'
+    + '</div>';
+
+  const wIn = $("#w-today");
+  if(document.activeElement !== wIn) wIn.value = state.weights[tk] != null ? state.weights[tk] : "";
+
+  const sess = sessionFor(tk);
+  if(sess){
+    const done = state.sessions[tk] || [];
+    const n = sess.ex.filter(e => done.includes(e.id)).length;
+    $("#jour-session").innerHTML = '<div class="card" style="margin-top:0;">'
+      + '<span class="day">' + sess.tag + '</span><h3>' + sess.title + '</h3>'
+      + '<p class="sub" style="margin:0 0 10px;">' + n + '/' + sess.ex.length + ' exercices cochés'
+      + (n === sess.ex.length ? ' — <span style="color:var(--ok);font-weight:700;">séance faite</span>' : '') + '</p>'
+      + '<button class="btn" type="button" onclick="showTab(\'seance\')">Ouvrir la séance</button></div>';
+  } else {
+    $("#jour-session").innerHTML = '<div class="card" style="margin-top:0;">'
+      + '<span class="day">Repos actif</span><h3>Marcher, récupérer</h3>'
+      + '<p class="sub" style="margin:0;">Pas de séance aujourd\'hui. 8–10 k pas, mobilité, sommeil. Le muscle se construit les jours off.</p></div>';
+  }
+
+  const h = state.habits[tk] || {};
+  const pesee = state.weights[tk] != null;
+  let hh = HABITS.map(x =>
+    '<div class="check' + (h[x.id] ? ' on' : '') + '" data-habit="' + x.id + '" role="checkbox" aria-checked="' + !!h[x.id] + '" tabindex="0">'
+    + '<span class="box"></span><span class="lbl">' + x.lbl + '</span></div>').join("");
+  hh += '<div class="check auto' + (pesee ? ' on' : '') + '" role="checkbox" aria-checked="' + pesee + '" aria-disabled="true">'
+    + '<span class="box"></span><span class="lbl"><b>Pesée du matin</b> — se coche avec ta pesée du jour</span></div>';
+  $("#habits-list").innerHTML = hh;
+
+  const streak = computeStreak();
+  $("#streak-line").innerHTML = streak > 0
+    ? 'Discipline : <b style="color:var(--blood);font-family:\'Bebas Neue\',Impact,sans-serif;font-size:18px;">' + streak + ' jour' + (streak>1?'s':'') + '</b> d\'affilée à 4/4.'
+    : 'Coche les 4 règles chaque jour pour lancer ta série.';
+}
+
+function dayComplete(k){
+  const h = state.habits[k] || {};
+  return HABITS.every(x => h[x.id]) && state.weights[k] != null;
+}
+function computeStreak(){
+  const d = parseKey(todayKey());
+  if(!dayComplete(keyOf(d))) d.setDate(d.getDate()-1);
+  let s = 0;
+  while(dayComplete(keyOf(d))){ s++; d.setDate(d.getDate()-1); }
+  return s;
+}
+
+function renderSeance(){
+  const tk = todayKey();
+  const sess = sessionFor(tk);
+  let html;
+  if(sess){
+    const done = state.sessions[tk] || [];
+    html = '<div class="card" style="margin-top:6px;"><span class="day">' + sess.tag + '</span><h3>' + sess.title + '</h3>'
+      + exList(sess).map(e =>
+        '<div class="check' + (done.includes(e.id) ? ' on' : '') + '" data-ex="' + e.id + '" role="checkbox" aria-checked="' + done.includes(e.id) + '" tabindex="0">'
+        + '<span class="box"></span><span class="lbl">' + esc(e.t) + '</span></div>').join("")
+      + '<div class="note">' + sess.note + '</div></div>';
+  } else {
+    html = '<div class="card" style="margin-top:6px;"><span class="day">Repos actif</span><h3>Rien à cocher aujourd\'hui</h3>'
+      + '<p class="sub" style="margin:0;">Prochaine séance : ' + nextSessionLabel() + '. En attendant : marche, mobilité, sommeil.</p></div>';
+  }
+  $("#seance-body").innerHTML = html;
+
+  $("#pullup-seg").innerHTML = PULLUP_LEVELS.map((l,i) =>
+    '<button type="button" data-lvl="' + i + '" class="' + (state.pullupLevel === i ? 'on' : '') + '">' + l.seg + '</button>').join("");
+
+  const mon = mondayOf(tk);
+  const labels = { 1:"Lun", 3:"Mer", 5:"Ven", 6:"Sam" };
+  $("#week-chips").innerHTML = '<div class="weekchips">' + [1,3,5,6].map(dw => {
+    const k = keyOf(addDays(mon, (dw+6)%7));
+    const cls = (sessionDone(k) ? " done" : "") + (k === tk ? " today" : "");
+    return '<div class="wc' + cls + '"><span class="d">' + (sessionDone(k) ? "✓" : "·") + '</span>' + labels[dw] + '</div>';
+  }).join("") + '</div>';
+}
+function nextSessionLabel(){
+  const t = parseKey(todayKey());
+  for(let i=1;i<=7;i++){ const d = addDays(t, i); const s = PLAN[d.getDay()]; if(s) return s.tag.split(" — ")[0].toLowerCase() + " (" + s.tag.split(" — ")[1] + ")"; }
+  return "";
+}
+
+function renderPoids(){
+  const last = lastWeight(), avg = avgLast7();
+  const days = Math.max(0, daysSinceStart(todayKey()));
+  const target = targetAt(days/7);
+  const togo = last != null ? last - state.goalWeight : null;
+  $("#poids-stats").innerHTML = '<div class="stats">'
+    + '<div class="stat blue"><div class="k">Moyenne 7 j</div><div class="v">' + (avg!=null?fmtKg(avg):"—") + '<small> kg</small></div></div>'
+    + '<div class="stat red"><div class="k">Cible du jour</div><div class="v">' + fmtKg(target) + '<small> kg</small></div></div>'
+    + '<div class="stat"><div class="k">Perdu</div><div class="v">' + (last!=null?fmtKg(Math.max(0,state.startWeight-last)):"—") + '<small> kg</small></div></div>'
+    + '<div class="stat green"><div class="k">Restant → 83</div><div class="v">' + (togo!=null?fmtKg(Math.max(0,togo)):"—") + '<small> kg</small></div></div>'
+    + '</div>';
+
+  renderChart();
+
+  const dIn = $("#w-date");
+  if(document.activeElement !== dIn && !dIn.value) dIn.value = todayKey();
+  dIn.max = todayKey();
+
+  const ks = sortedKeys().slice(-14).reverse();
+  $("#entries").innerHTML = ks.length
+    ? '<div class="entries">' + ks.map((k,i) => {
+        const prevK = ks[i+1];
+        const diff = prevK ? state.weights[k] - state.weights[prevK] : null;
+        const dc = diff == null ? "" : diff < -0.001 ? "down" : diff > 0.001 ? "up" : "";
+        const ds = diff == null ? "" : (diff > 0 ? "+" : "") + fmtKg(diff);
+        return '<div class="entry"><span class="dt">' + fmtShort(k) + ' · S' + phaseWeek(k) + '</span>'
+          + '<span class="diff ' + dc + '">' + ds + '</span>'
+          + '<span class="kg">' + fmtKg(state.weights[k]) + ' kg</span>'
+          + '<button type="button" data-del="' + k + '" aria-label="Supprimer la pesée du ' + fmtShort(k) + '">✕</button></div>';
+      }).join("") + '</div>'
+    : '<p class="sub" style="margin-top:12px;">Aucune pesée enregistrée pour l\'instant.</p>';
+}
+
+function renderChart(){
+  const W = 640, H = 320, L = 50, R = 18, T = 16, B = 34;
+  const iw = W - L - R, ih = H - T - B;
+  const ks = sortedKeys();
+  const daily = ks.map(k => [Math.max(-1, daysSinceStart(k))/7, state.weights[k]]);
+  const weeks = [...new Set(ks.map(phaseWeek))].sort((a,b)=>a-b);
+  const avgs = weeks.map(w => [w - 0.5, weeklyAvg(w), w]); // point au milieu de la semaine
+
+  const xMax = 17.5;
+  let yMin = 80, yMax = 93;
+  daily.forEach(p => { yMin = Math.min(yMin, p[1]-1); yMax = Math.max(yMax, p[1]+1); });
+  yMin = Math.floor(yMin); yMax = Math.ceil(yMax);
+  const X = v => L + (Math.max(0,v)/xMax)*iw;
+  const Y = v => T + (1 - (v - yMin)/(yMax - yMin))*ih;
+
+  let s = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Courbe de poids : moyenne hebdomadaire contre la trajectoire cible de 91,1 à 83 kg">';
+  // grille
+  for(let g = yMin + (yMin%2?1:2); g < yMax; g += 2){
+    s += '<line x1="'+L+'" y1="'+Y(g)+'" x2="'+(W-R)+'" y2="'+Y(g)+'" stroke="#312e36" stroke-width="1"/>'
+       + '<text x="'+(L-8)+'" y="'+(Y(g)+5)+'" text-anchor="end" font-size="15" fill="#a49e92" font-family="IBM Plex Mono,monospace">'+g+'</text>';
+  }
+  // repères semaines
+  [4,8,12,16].forEach(w => {
+    s += '<line x1="'+X(w)+'" y1="'+T+'" x2="'+X(w)+'" y2="'+(H-B)+'" stroke="#312e36" stroke-width="1" stroke-dasharray="2 4"/>'
+       + '<text x="'+X(w)+'" y="'+(H-B+22)+'" text-anchor="middle" font-size="15" fill="#a49e92" font-family="IBM Plex Mono,monospace">S'+w+'</text>';
+  });
+  // aujourd'hui
+  const tw = Math.max(0, daysSinceStart(todayKey()))/7;
+  if(tw > 0 && tw < xMax){
+    s += '<line x1="'+X(tw)+'" y1="'+T+'" x2="'+X(tw)+'" y2="'+(H-B)+'" stroke="#a49e92" stroke-width="1" opacity="0.35"/>';
+  }
+  // trajectoire cible
+  s += '<polyline points="'+X(0)+','+Y(state.startWeight)+' '+X(16.2)+','+Y(state.goalWeight)+' '+X(xMax)+','+Y(state.goalWeight)
+     + '" fill="none" stroke="#c22f2c" stroke-width="2.5" stroke-dasharray="7 6"/>';
+  MILESTONES.forEach(m => {
+    s += '<rect x="'+(X(m.week)-4.5)+'" y="'+(Y(m.target)-4.5)+'" width="9" height="9" transform="rotate(45 '+X(m.week)+' '+Y(m.target)+')" fill="#c22f2c"><title>S'+m.week+' · cible ≤ '+m.target+' kg</title></rect>';
+  });
+  // points quotidiens
+  daily.forEach(p => { s += '<circle cx="'+X(p[0])+'" cy="'+Y(p[1])+'" r="3" fill="#4f9bd9" opacity="0.4"/>'; });
+  // moyenne hebdo
+  if(avgs.length){
+    s += '<polyline points="'+avgs.map(p => X(p[0])+','+Y(p[1])).join(" ")+'" fill="none" stroke="#4f9bd9" stroke-width="3.5" stroke-linejoin="round"/>';
+    avgs.forEach((p,i) => {
+      const isLast = i === avgs.length-1;
+      s += '<circle cx="'+X(p[0])+'" cy="'+Y(p[1])+'" r="'+(isLast?6.5:5)+'" fill="#4f9bd9" stroke="#111013" stroke-width="2"><title>Semaine '+p[2]+' · moyenne '+fmtKg(p[1])+' kg</title></circle>';
+      if(isLast){
+        const lx = X(p[0]), anchor = lx > W - 110 ? 'end' : 'start', tx = anchor === 'end' ? lx - 11 : lx + 11;
+        s += '<text x="'+tx+'" y="'+(Y(p[1])-12)+'" text-anchor="'+anchor+'" font-size="18" font-weight="600" fill="#e8e4dc" font-family="IBM Plex Mono,monospace">'+fmtKg(p[1])+'</text>';
+      }
+    });
+  }
+  // libellé cible en bout de ligne
+  s += '<text x="'+(W-R)+'" y="'+(Y(state.goalWeight)+20)+'" text-anchor="end" font-size="15" fill="#c22f2c" font-family="IBM Plex Mono,monospace">83 kg</text>';
+  s += '</svg>';
+  $("#chart").innerHTML = s;
+}
+
+function renderJalons(){
+  const cw = phaseWeek(todayKey());
+  const started = daysSinceStart(todayKey()) >= 0;
+  $("#milestones").innerHTML = MILESTONES.map(m => {
+      const deadline = keyOf(addDays(parseKey(state.startDate), m.week*7 - 1));
+      let st;
+      if(!started || cw <= m.week - 4) st = '<span class="st">à venir · ' + fmtShort(deadline) + '</span>';
+      else if(cw <= m.week) st = '<span class="st now">en cours · éch. ' + fmtShort(deadline) + '</span>';
+      else {
+        let ref = weeklyAvg(m.week);
+        if(ref == null){
+          const before = sortedKeys().filter(k => phaseWeek(k) <= m.week);
+          ref = before.length ? state.weights[before[before.length-1]] : null;
+        }
+        st = ref == null ? '<span class="st">pas de pesée</span>'
+           : ref <= m.target + 0.05 ? '<span class="st ok">atteint · ' + fmtKg(ref) + ' kg</span>'
+           : '<span class="st ko">manqué · ' + fmtKg(ref) + ' kg</span>';
+      }
+      return '<div class="ms"><div class="top"><span class="wk">Semaine ' + m.week + '</span>'
+        + '<span class="tg">≤ ' + m.target + ' kg</span>' + st + '</div>'
+        + '<div class="test">' + m.test + '</div></div>';
+    }).join("");
+}
+
+function renderQuote(){
+  const q = QUOTES[Math.max(0, daysSinceStart(todayKey())) % QUOTES.length];
+  $("#quote").innerHTML = q[0] + '<span class="display">' + q[1] + '</span>';
+}
+
+function renderAll(){
+  renderVerdict(); renderJour(); renderSeance(); renderPoids(); renderJalons(); renderQuote();
+}
+
+/* ================= interactions ================= */
+function showTab(name){
+  ["jour","seance","poids","jalons"].forEach(t => { $("#view-"+t).hidden = t !== name; });
+  document.querySelectorAll("nav.tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === name));
+  window.scrollTo({ top:0 });
+}
+document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+
+function addWeight(k, val){
+  const v = parseFloat(String(val).replace(",", "."));
+  if(!k || isNaN(v) || v < 40 || v > 200) return false;
+  state.weights[k] = Math.round(v*10)/10;
+  touch();
+  return true;
+}
+$("#w-today-btn").addEventListener("click", () => {
+  if(addWeight(todayKey(), $("#w-today").value)) $("#w-today").blur();
+});
+$("#w-today").addEventListener("keydown", e => { if(e.key === "Enter") $("#w-today-btn").click(); });
+$("#w-add-btn").addEventListener("click", () => {
+  if(addWeight($("#w-date").value, $("#w-kg").value)) $("#w-kg").value = "";
+});
+$("#w-kg").addEventListener("keydown", e => { if(e.key === "Enter") $("#w-add-btn").click(); });
+
+$("#entries").addEventListener("click", e => {
+  const b = e.target.closest("[data-del]");
+  if(b){ delete state.weights[b.dataset.del]; touch(); }
+});
+
+function toggleFrom(e){
+  const hb = e.target.closest("[data-habit]");
+  if(hb){
+    const k = todayKey();
+    state.habits[k] = state.habits[k] || {};
+    state.habits[k][hb.dataset.habit] = !state.habits[k][hb.dataset.habit];
+    touch(); return true;
+  }
+  const ex = e.target.closest("[data-ex]");
+  if(ex){
+    const k = todayKey();
+    const arr = state.sessions[k] = state.sessions[k] || [];
+    const i = arr.indexOf(ex.dataset.ex);
+    if(i >= 0) arr.splice(i,1); else arr.push(ex.dataset.ex);
+    touch(); return true;
+  }
+  return false;
+}
+$("#habits-list").addEventListener("click", toggleFrom);
+$("#seance-body").addEventListener("click", toggleFrom);
+[$("#habits-list"), $("#seance-body")].forEach(el =>
+  el.addEventListener("keydown", e => { if(e.key === " " || e.key === "Enter"){ if(toggleFrom(e)) e.preventDefault(); } }));
+
+$("#pullup-seg").addEventListener("click", e => {
+  const b = e.target.closest("[data-lvl]");
+  if(b){ state.pullupLevel = Number(b.dataset.lvl); touch(); }
+});
+
+/* ================= export / import ================= */
+function expNote(msg){ $("#exp-note").textContent = msg; }
+function allDates(){
+  return [...new Set([...Object.keys(state.weights), ...Object.keys(state.habits), ...Object.keys(state.sessions)])].sort();
+}
+
+function buildCsv(sep, dec){
+  const oui = b => b ? "oui" : "non";
+  const head = ["date","semaine","poids_kg","proteines","zero_calorie_liquide","pas_8_10k","pesee","seance","exercices"];
+  const lines = [head.join(sep)];
+  allDates().forEach(k => {
+    const h = state.habits[k] || {};
+    const w = state.weights[k];
+    const sess = sessionFor(k);
+    const done = state.sessions[k] || [];
+    const n = sess ? sess.ex.filter(e => done.includes(e.id)).length : 0;
+    const seance = !sess ? "repos" : n === sess.ex.length ? "faite" : n > 0 ? "partielle" : (k < todayKey() ? "manquée" : "");
+    lines.push([ k, phaseWeek(k),
+      w != null ? String(w).replace(".", dec) : "",
+      oui(h.prot), oui(h.liquide), oui(h.pas), oui(w != null),
+      seance, done.join(" ")
+    ].join(sep));
+  });
+  return lines.join("\r\n");
+}
+
+function saveFile(filename, data){
+  const csv = filename.endsWith(".csv");
+  const blob = new Blob([csv ? "﻿" + data : data], { type: csv ? "text/csv;charset=utf-8" : "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  expNote(filename + " téléchargé.");
+}
+$("#exp-csv").addEventListener("click", () => saveFile("dragonslayer-" + todayKey() + ".csv", buildCsv(";", ",")));
+$("#exp-json").addEventListener("click", () => saveFile("dragonslayer-backup-" + todayKey() + ".json", JSON.stringify(state, null, 2)));
+
+let pendingImport = null;
+$("#imp-btn").addEventListener("click", () => $("#imp-file").click());
+$("#imp-file").addEventListener("change", () => {
+  const f = $("#imp-file").files[0];
+  $("#imp-file").value = "";
+  if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    let obj = null;
+    try{ obj = JSON.parse(rd.result); }catch(e){}
+    if(!obj || typeof obj !== "object" || typeof obj.weights !== "object"){
+      expNote("Fichier illisible — attendu : une sauvegarde JSON de Dragonslayer."); return;
+    }
+    pendingImport = obj;
+    const n = Object.keys(obj.weights || {}).length;
+    const box = $("#imp-confirm");
+    box.hidden = false;
+    box.innerHTML = '<p style="margin:0 0 10px;font-size:13.5px;">Remplacer les données actuelles par cette sauvegarde ? '
+      + '<b>' + n + ' pesée' + (n > 1 ? 's' : '') + '</b>, dernière mise à jour '
+      + (obj.updatedAt ? new Date(obj.updatedAt).toLocaleDateString("fr-FR") : "inconnue") + '.</p>'
+      + '<div class="row"><button class="btn" id="imp-ok" type="button">Remplacer</button>'
+      + '<button class="btn ghost" id="imp-no" type="button">Annuler</button></div>';
+    $("#imp-ok").addEventListener("click", () => {
+      state = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), pendingImport);
+      migrate(pendingImport);
+      pendingImport = null; box.hidden = true; box.innerHTML = "";
+      expNote("Sauvegarde importée.");
+      touch();
+    });
+    $("#imp-no").addEventListener("click", () => { pendingImport = null; box.hidden = true; box.innerHTML = ""; });
+  };
+  rd.readAsText(f);
+});
+
+/* ================= boot ================= */
+async function boot(){
+  setChip("pending");
+  let remote = null, local = null;
+  if(sb){
+    try{
+      const { data, error } = await sb.from("dragonslayer_state").select("data").eq("id", "main").maybeSingle();
+      if(!error && data && data.data) remote = data.data;
+    }catch(e){}
+  }
+  try{ local = JSON.parse(localStorage.getItem(LS_KEY) || "null"); }catch(e){}
+  let chosen = null, localNewer = false;
+  if(remote && local){ localNewer = (local.updatedAt||0) > (remote.updatedAt||0); chosen = localNewer ? local : remote; }
+  else { chosen = remote || local; localNewer = !!local && !remote; }
+  if(chosen && typeof chosen === "object"){
+    state = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), chosen);
+    migrate(chosen);
+  }
+  renderAll();
+  noteStorage();
+  if(!sb){ setChip("local"); return; }
+  setChip("saved");
+  if(localNewer){ clearTimeout(saveTimer); saveTimer = setTimeout(persist, 1200); }
+
+  // temps réel : une écriture depuis un autre appareil met cette vue à jour
+  try{
+    sb.channel("dragonslayer")
+      .on("postgres_changes", { event: "*", schema: "public", table: "dragonslayer_state", filter: "id=eq.main" }, payload => {
+        const d = payload.new && payload.new.data;
+        if(d && (d.updatedAt || 0) > (state.updatedAt || 0)){
+          state = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), d);
+          migrate(d);
+          cacheLocal();
+          renderAll();
+        }
+      }).subscribe();
+  }catch(e){}
+}
+boot();
+
+// nouveau jour pendant que l'app reste ouverte → re-rendu
+let shownDay = todayKey();
+setInterval(() => { if(todayKey() !== shownDay){ shownDay = todayKey(); renderAll(); } }, 60000);
+</script>
+</body>
+</html>
