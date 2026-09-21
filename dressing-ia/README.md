@@ -1,56 +1,79 @@
-# Welcome to your Expo app 👋
+# Dressing IA — maquette fonctionnelle
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Démo commerciale. Un seul codebase qui tourne **dans un navigateur** (pour montrer à un prospect sans rien installer) et **sur iPhone et Android** via Expo Go.
 
-## Get started
+Ce n'est pas un prototype jetable : tout ce qui est ici est le socle réutilisable de la version finale.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Lancer la démo
 
 ```bash
-npm run reset-project
+npm install
+npm run web          # navigateur, http://localhost:8081
+npm start            # QR code -> Expo Go sur iPhone / Android
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Build statique à héberger n'importe où (Netlify, Vercel, un dossier) :
 
-### Other setup steps
+```bash
+npx expo export --platform web   # sort dans dist/
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Aucune clé d'API, aucun compte, aucune connexion requise.
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## Ce que la maquette démontre
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+**Le moteur de tenues est déterministe.** Isolation thermique en **clo** (ISO 9920), générateur pseudo-aléatoire à graine, zéro appel LLM. Même entrée → même sortie, toujours. C'est ce qui rend la recette du projet opposable : on ne discute pas de savoir si une tenue est jolie, on vérifie si son isolation tient dans la fourchette.
 
-## Join the community
+**Le sélecteur de bulletins météo.** Canicule 34 °C, été doux, mi-saison, pluie, froid sec, gel avec vent. Un tap et les propositions changent devant le client. C'est la fonction la plus importante de la démo : elle prouve le lien météo → vêtement en trois secondes.
 
-Join our community of developers creating universal apps.
+**L'écran Recette.** 30 situations météo rejouées sur le dressing, critère binaire (isolation entre 0,85 et 1,15 × la cible), taux de réussite affiché. C'est l'argument qui désamorce le « oui mais les tenues sont moches » avant qu'il arrive.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+**Les états dégradés.** Dressing vide, dressing insuffisant pour le froid, filtres trop stricts : chaque cas a son écran et son message. Jamais d'écran blanc.
+
+### Le résultat actuel : 25/30
+
+Cinq scénarios échouent, tous dans le grand froid : le dressing de démonstration n'a pas de quoi atteindre 2,8 clo. **C'est voulu, et c'est un argument, pas un défaut.** Le rapport nomme la situation au lieu de la masquer — c'est exactement la fonction « liste de manques » qui se vend en V2.
+
+---
+
+## Ce que la maquette ne fait pas, délibérément
+
+| Absent | Pourquoi |
+|---|---|
+| Photos de vêtements | Rendu par aplat de couleur HSL. Zéro fichier binaire, **zéro question de droits à l'image** |
+| Appareil photo, détourage, upload | C'est le poste le plus coûteux du build (30-40 % des bugs). Hors périmètre d'une démo |
+| Compte, authentification | Aucune donnée personnelle, donc aucune obligation RGPD sur la démo |
+| Paiement, abonnement | Déclencherait StoreKit, Google Play Billing et le Paid Applications Agreement |
+| Appel réseau | La météo réelle est branchable (`WeatherApiProvider`), mais la démo tourne sur des bulletins figés |
+
+---
+
+## Architecture
+
+```
+src/domain/     types.ts (contrat partagé) · clo.ts (ISO 9920) · color.ts (harmonie HSL)
+                engine.ts (générateur déterministe) · scenarios.ts (les 30 cas de recette)
+src/data/       taxonomy.ts (catégories, 22 couleurs) · wardrobe.ts (42 pièces fictives)
+src/weather/    clo-target.ts (température ressentie -> cible clo) · provider.ts (mock + WeatherAPI)
+src/theme/      tokens.ts (clair/sombre) · components.tsx (design system)
+src/store/      wardrobe-store.ts (contexte React) · storage.ts (persistance tolérante aux pannes)
+src/app/        expo-router — tenue du jour, dressing, recette, profil, fiche vêtement
+```
+
+**Règles tenues dans tout le code :** TypeScript strict sans `any`, aucun `Math.random()` ni `Date.now()` dans la logique métier, tout le texte visible en français, clair et sombre partout, largeur de contenu bornée pour rester présentable sur grand écran.
+
+### Brancher la météo réelle
+
+`WeatherApiProvider` cible WeatherAPI.com, dont le plan gratuit (100 000 appels/mois) **autorise explicitement l'usage commercial** — contrairement à Open-Meteo, dont le gratuit est non-commercial. Un adaptateur unique isole le fournisseur : en changer prend une journée.
+
+---
+
+## Stack
+
+Expo SDK 57 · React Native 0.86 · React 19.2 · expo-router · react-native-web · TypeScript 6
+
+`npx tsc --noEmit` passe sans erreur. `npx expo export --platform web` build sans erreur, zéro erreur console au runtime.
