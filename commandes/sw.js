@@ -1,6 +1,6 @@
 // Service worker : l'appli fonctionne sans réseau (au marché).
 // Changer VERSION à chaque mise à jour des fichiers.
-const VERSION = 'commandes-v1';
+const VERSION = 'commandes-v2';
 const FILES = [
   './',
   './index.html',

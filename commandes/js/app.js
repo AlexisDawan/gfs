@@ -69,6 +69,24 @@ function toast(msg, undo) {
   toastTimer = setTimeout(() => el.classList.remove('show'), undo ? 6000 : 3000);
 }
 
+/* ---------- Confirmation (dans la page) ---------- */
+
+function ask(message, okLabel = 'Supprimer') {
+  const dlg = $('#confirm');
+  $('#confirm-msg').textContent = message;
+  $('#confirm-ok').textContent = okLabel;
+  dlg.showModal();
+  return new Promise((resolve) => {
+    const done = (answer) => { dlg.close(); resolve(answer); };
+    dlg.onclick = (e) => {
+      const b = e.target.closest('button[data-answer]');
+      if (b) done(b.dataset.answer === 'ok');
+      else if (e.target === dlg) done(false);
+    };
+    dlg.oncancel = (e) => { e.preventDefault(); done(false); };
+  });
+}
+
 /* ---------- Rappels ---------- */
 
 function computeReminders() {
@@ -618,8 +636,8 @@ function openEditor(order) {
       render();
       toast('Commande modifiée');
     },
-    onDelete: () => {
-      if (!confirm(`Supprimer la commande de ${order.client || 'ce client'} ?`)) return;
+    onDelete: async () => {
+      if (!(await ask(`Supprimer la commande de ${order.client || 'ce client'} ?`))) return;
       const idx = state.orders.indexOf(order);
       state.orders.splice(idx, 1);
       persist();
@@ -783,15 +801,15 @@ function renderSettings(root) {
       }
     };
   });
-  $('#purge').onclick = () => {
-    if (!confirm(`Supprimer définitivement ${plural(old.length, 'commande terminée', 'commandes terminées')} depuis plus de 30 jours ?`)) return;
+  $('#purge').onclick = async () => {
+    if (!(await ask(`Supprimer définitivement ${plural(old.length, 'commande terminée', 'commandes terminées')} depuis plus de 30 jours ?`))) return;
     const ids = new Set(old.map((o) => o.id));
     state.orders = state.orders.filter((o) => !ids.has(o.id));
     persist();
     renderSettings(root);
   };
-  $('#wipe').onclick = () => {
-    if (!confirm('Effacer TOUTES les commandes de cet appareil ? Cette action est définitive.')) return;
+  $('#wipe').onclick = async () => {
+    if (!(await ask('Effacer toutes les commandes de cet appareil ? Cette action est définitive.', 'Tout effacer'))) return;
     state.orders = [];
     persist();
     renderSettings(root);

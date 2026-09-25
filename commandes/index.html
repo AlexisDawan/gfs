@@ -52,6 +52,16 @@
     </div>
   </dialog>
 
+  <dialog id="confirm" class="confirm" aria-labelledby="confirm-msg">
+    <div class="confirm-box">
+      <p id="confirm-msg"></p>
+      <div class="form-actions">
+        <button type="button" class="btn ghost" data-answer="cancel">Annuler</button>
+        <button type="button" class="btn danger" id="confirm-ok" data-answer="ok">Supprimer</button>
+      </div>
+    </div>
+  </dialog>
+
   <div id="toast" role="status"></div>
 
   <script type="module" src="js/app.js"></script>
