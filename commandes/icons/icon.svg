@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#8e1f3c"/>
+  <!-- couvercle en tissu -->
+  <path d="M150 150 Q256 110 362 150 L372 196 Q256 176 140 196 Z" fill="#f3e3c3"/>
+  <rect x="160" y="190" width="192" height="26" rx="8" fill="#e8cfa4"/>
+  <!-- pot -->
+  <path d="M170 216 H342 Q370 240 370 280 V380 Q370 412 338 412 H174 Q142 412 142 380 V280 Q142 240 170 216 Z" fill="#fff7ef"/>
+  <path d="M160 300 H352 V376 Q352 396 332 396 H180 Q160 396 160 376 Z" fill="#d23a5d"/>
+  <!-- étiquette coche -->
+  <path d="M206 312 l34 34 l66 -66" fill="none" stroke="#fff7ef" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

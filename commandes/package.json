@@ -1,0 +1,9 @@
+{
+  "name": "commandes-marche",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npx http-server -p 8080 -c-1 .",
+    "test": "node --test tests/parser.test.mjs"
+  }
+}

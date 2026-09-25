@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mes Commandes</title>
+  <meta name="description" content="Prise et suivi des commandes pour les marchés.">
+  <meta name="theme-color" content="#8e1f3c" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c1416" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Commandes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 id="title">Nouvelle commande</h1>
+  </header>
+
+  <main id="view" aria-live="polite"></main>
+
+  <nav class="tabbar" aria-label="Navigation">
+    <button type="button" data-view="home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Saisir</span><span class="badge alert" id="badge-home" hidden></span>
+    </button>
+    <button type="button" data-view="orders">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>
+      <span>Commandes</span><span class="badge" id="badge-orders" hidden></span>
+    </button>
+    <button type="button" data-view="production">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10M8 4v3a4 4 0 0 0-2 3.5V19a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-8.5A4 4 0 0 0 16 7V4M6 12h12"/></svg>
+      <span>Production</span>
+    </button>
+    <button type="button" data-view="settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      <span>Réglages</span>
+    </button>
+  </nav>
+
+  <dialog id="editor" aria-labelledby="editor-title">
+    <div class="sheet">
+      <header>
+        <h2 id="editor-title">Modifier la commande</h2>
+        <button type="button" class="icon-btn" id="editor-close" aria-label="Fermer">✕</button>
+      </header>
+      <div class="sheet-body" id="editor-body"></div>
+    </div>
+  </dialog>
+
+  <div id="toast" role="status"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
